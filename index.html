@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Компакт-диски от Jurgen Köhler</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Стили для фильтров и поиска */
+        .filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+            flex: 1;
+        }
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-size: 13px;
+        }
+        .filter-group select,
+        .filter-group input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #333;
+            background-color: #f9f9f9;
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #2980b9;
+            background-color: #fff;
+        }
+
+        /* Стили для таблицы */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            padding: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid #ccc;
+        }
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+        td {
+            white-space: normal;
+        }
+        td:nth-child(7), td:nth-child(8), td:nth-child(9), td:nth-child(10) {
+            min-width: 200px;
+        }
+        
+        /* Стили для миниатюр */
+        .thumbnail {
+            height: 50px;
+            width: auto;
+            max-width: 90px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 5px;
+            margin-bottom: 3px;
+            background-color: #eee;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .thumbnail:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-color: #2980b9;
+        }
+
+        .summary-row {
+            background-color: #e9ecef;
+            font-weight: bold;
+            border-top: 2px solid #ccc;
+        }
+        .summary-row td {
+            color: #2c3e50;
+        }
+
+        /* Стили для модального окна */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            padding-top: 50px; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.85); 
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+            animation: zoomIn 0.3s;
+        }
+        @keyframes zoomIn {
+            from {transform: scale(0.9); opacity: 0;}
+            to {transform: scale(1); opacity: 1;}
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #modal-caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            font-size: 16px;
+        }
+        
+        /* Сообщение, если ничего не найдено */
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #e74c3c;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Компакт-диски от Jurgen Köhler</h1>
+    
+    <div class="filters-container">
+        <div class="filter-group">
+            <label for="search-box">Поиск по всем полям:</label>
+            <input type="text" id="search-box" placeholder="Введите текст для поиска..." oninput="filterTable()">
+        </div>
+        <div class="filter-group">
+            <label for="filter-genre">Жанр:</label>
+            <select id="filter-genre" onchange="filterTable()">
+                <option value="">Все жанры</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-composer-ru">Композитор:</label>
+            <select id="filter-composer-ru" onchange="filterTable()">
+                <option value="">Все композиторы</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-composer-orig">Композитор (как на упаковке):</label>
+            <select id="filter-composer-orig" onchange="filterTable()">
+                <option value="">Все оригиналы</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-artist">Исполнитель:</label>
+            <select id="filter-artist" onchange="filterTable()">
+                <option value="">Все исполнители</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="no-results" id="no-results-msg">По выбранным критериям ничего не найдено.</div>
+
+    <div class="table-container">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Файлы фото</th>
+                    <th>Дисков</th>
+                    <th>Происхождение</th>
+                    <th>Жанр</th>
+                    <th>Тип подборки</th>
+                    <th>Композитор(ы)</th>
+                    <th>Композитор(ы) (как на упаковке)</th>
+                    <th>Исполнитель(и)</th>
+                    <th>Исполнитель(и) (как на упаковке)</th>
+                    <th>Автор (аудиокниги)</th>
+                    <th>Название книги</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Данные будут сгенерированы скриптом -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="imageModal" class="modal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImg">
+        <div id="modal-caption"></div>
+    </div>
+
+    <script>
+        // Базовый путь к папке с картинками
+        const BASE_PATH = 'cover/';
+
+        // Словарь для перевода имен композиторов с оригинального на русский
+        const composerTranslation = {
+            'Mozart': 'Моцарт',
+            'Schubert': 'Шуберт',
+            'Schumann': 'Шуман',
+            'Liszt': 'Лист',
+            'Beethoven': 'Бетховен',
+            'Brahms': 'Брамс',
+            'Dvořák': 'Дворжак',
+            'Tschaikowsky': 'Чайковский',
+            'Mendelssohn': 'Мендельсон',
+            'Prokofieff': 'Прокофьев',
+            'Haydn': 'Гайдн',
+            'Mahler': 'Малер',
+            'Bruch': 'Брух',
+            'Vivaldi': 'Вивальди',
+            'Puccini': 'Пуччини',
+            'Gluck': 'Глюк',
+            'Mascagni': 'Масканьи',
+            'Devienne': 'Девьенн',
+            'Chopin': 'Шопен',
+            'Pacini': 'Пачини',
+            'Ravel': 'Равель',
+            'Verdi': 'Верди',
+            'Bellini': 'Беллини',
+            'Bach': 'Бах',
+            'Cherubini': 'Керубини',
+            'Donizetti': 'Доницетти',
+            'Rossini': 'Россини',
+            'Bizet': 'Бизе',
+            'Spontini': 'Спонтини',
+            'Massenet': 'Массне',
+            'Wagner': 'Вагнер',
+            'Lortzing': 'Лорцинг',
+            'Grieg': 'Григ',
+            'Berlioz': 'Берлиоз',
+            'Mussorgsky': 'Мусоргский',
+            'Bruckner': 'Брукнер',
+            'Strauß I': 'Штраус-отец',
+            'Sarasate': 'Сарасате',
+            'Leoncavallo': 'Леонкавалло',
+            'Kempter': 'Кемптер',
+            'Scarlatti': 'Скарлатти',
+            'Lasso': 'Лассо',
+            'Händel': 'Гендель',
+            'Gounod': 'Гуно',
+            'Krebs': 'Кребс',
+            'Kauffmann': 'Кауфман',
+            'Alcock': 'Олкок',
+            'Corrette': 'Корретт',
+            'Mendelsohn-Bartholdy': 'Мендельсон-Бартольди',
+            'Thormé': 'Торме',
+            'Gillespie': 'Гиллеспи',
+            'Ebel': 'Эбель',
+            'Jones': 'Джонс',
+            'Jabara': 'Джабара',
+            'Schaffer': 'Шаффер',
+            'Ruiz': 'Руис',
+            'Carmichael': 'Кармайкл',
+            'Jovi': 'Бон Джови',
+            'Elfman': 'Элфман',
+            'Newman': 'Ньюман',
+            'Miles': 'Майлз',
+            'Berlin': 'Берлин',
+            'Gruber': 'Грубер',
+            'Martin': 'Мартин',
+            'F. Chopin': 'Шопен',
+            'Wolf Ferrari': 'Вольф-Феррари',
+            'Flotow': 'Флотов',
+            'Offenbach': 'Оффенбах',
+            'Lehár': 'Легар',
+            'Delibes': 'Делиб',
+            'Charpentier': 'Шарпантье'
+        };
+
+        // Данные из Excel-файла
+        const catalogData = [
+            { id: 1, files: ['01.jpg', '01-1.jpg'], count: 1, origin: 'Eurodisc / BMG Ariola, Германия, © 1990 (VD 69132)', genre: 'классика', type: 'Сборник «Klassische Kostbarkeiten Vol. 4», 10 треков', comp: 'Моцарт, Шуберт, Шуман, Лист, Бетховен, Брамс', compOrig: 'Mozart, Schubert, Schumann, Liszt, Beethoven, Brahms', artist: '—', artistOrig: '—', author: '—', book: '—' },
+            { id: 2, files: ['02.jpg', '02-2.jpg'], count: 1, origin: 'EMI Classics for Pleasure, Великобритания, ℗ 1983 (CD-CFP 4597)', genre: 'классика, оркестровая', type: 'Монографический (Дворжак)', comp: 'Дворжак', compOrig: 'Dvořák', artist: 'Английский камерный оркестр, сэр Чарлз Маккеррас; духовой ансамбль оркестра (без дирижёра)', artistOrig: 'English Chamber Orchestra, Sir Charles Mackerras; English Chamber Orchestra Wind Ensemble', author: '—', book: '—' },
+            { id: 3, files: ['03.png', '03-1.png'], count: 1, origin: 'VMK globe / Mediaphon, ФРГ, 1989 (100.41824)', genre: 'классика', type: 'Монографический сборник (Бетховен)', comp: 'Бетховен', compOrig: 'Ludwig van Beethoven', artist: 'Эжен Шеффер, Дубравка Томшич, оркестр Бельгийского фестиваля, дирижёр Пьер Нарато', artistOrig: 'Eugène Schaeffer, Dubravka Tomšič, Orchestre du Festival Belgique, Pierre Narrato', author: '—', book: '—' },
+            { id: 4, files: ['04.png', '04-1.png'], count: 1, origin: 'Sony Classical (Essential Classics, SBK 46345), © 1990, записи CBS 1953/58', genre: 'классика, фортепиано', type: 'Монографический (Бетховен)', comp: 'Бетховен', compOrig: 'Ludwig van Beethoven', artist: 'Роберт Казадезюс', artistOrig: 'Robert Casadesus', author: '—', book: '—' },
+            { id: 5, files: ['05.png', '05-1.png', '05-2.png'], count: 3, origin: 'Sony Music, Германия, © 2015', genre: 'классика', type: 'Сборник лауреатов ECHO Klassik 2015 «Best of Klassik»', comp: 'Брух, Вивальди, Брамс, Шуман, Пуччини, Гайдн, Чайковский, Глюк, Моцарт, Масканьи, Девьенн, Шопен, Пачини, Равель, Верди, Беллини, Бах и др.', compOrig: 'Bruch, Vivaldi, Brahms, Schumann, Puccini, Haydn, Tschaikowski, Gluck, Mozart, Mascagni, Devienne, Chopin, Pacini, Ravel, Verdi, Bellini, Bach …', artist: 'Лан Лан, Элина Гаранча, Йонас Кауфман, Морис Стегер, Дэвид Гаретт, Андреас Оттензамер, Соня Йончева, Брайан Хаймел, Мария Каллас, Григорий Соколов и др.', artistOrig: 'Lang Lang, Elīna Garanča, Jonas Kaufmann, Maurice Steger, David Garrett, Andreas Ottensamer, Sonya Yoncheva, Bryan Hymel, Maria Callas, Grigory Sokolov …', author: '—', book: '—' },
+            { id: 6, files: ['06.png', '06-1.png'], count: 3, origin: 'Classical Collection (CDCLC 5015), сделано в ЕЭС', genre: 'классика, опера', type: 'Сольный сборник арий (Каллас), 3 тома', comp: 'Керубини, Пуччини, Беллини, Верди, Доницетти, Россини, Бизе, Спонтини, Массне', compOrig: 'Cherubini, Puccini, Bellini, Verdi, Donizetti, Rossini, Bizet, Spontini, Massenet', artist: 'Мария Каллас', artistOrig: 'Maria Callas', author: '—', book: '—' },
+            { id: 7, files: ['07.png', '07-1.png'], count: 1, origin: 'Generali Lloyd Versicherungen, Германия; запись Organic Music, Обинг', genre: 'джаз, рождественская музыка', type: 'Тематический альбом «…Ich bring Euch gute neue Mär…», 10 треков', comp: 'И. Берлин, Ф. Грубер, М. Мартин, М. Торме, Х. Гиллеспи, Э. Эбель / Т. Джонс, народные песни', compOrig: 'E. Berlin, F. Gruber, M. Martin, M. Thormé, H. Gillespie, E. Ebel / Th. Jones, Volkslied', artist: 'Давид Газаров (аранжировки)', artistOrig: 'David Gazarov (All Arrangements)', author: '—', book: '—' },
+            { id: 8, files: ['08.png', '08-1.png'], count: 2, origin: 'Universal / Tchibo, © 2007 (Art.-Nr. 242473)', genre: 'классика, симфоническая', type: 'Сборник частей симфоний «Große Dirigenten…»', comp: 'Моцарт, Гайдн, Бетховен, Шуберт, Шуман, Брамс, Дворжак, Чайковский, Мендельсон, Прокофьев, Берлиоз, Малер, Брукнер, Сен-Санс (часть имён по названиям произведений)', compOrig: 'Mozart, Haydn, Beethoven, Schubert, Schumann, Brahms, Dvořák, Tschaikowsky, Mendelssohn, Prokofieff (остальные имена на упаковке не указаны)', artist: 'Невилл Маррайнер, Колин Дэвис, Герберт фон Караян, Карлос Клайбер, Джеймс Левайн, Карло Мария Джулини, Сэйдзи Одзава, Клаудио Аббадо, Джузеппе Синополи, Курт Мазур, Леонард Бернстайн, Лорин Маазель, Андре Превин, Карл Бём, Джон Элиот Гардинер, Зубин Мета, Георг Шолти, Даниэль Баренбойм', artistOrig: 'Sir Neville Marriner, Sir Colin Davis, Herbert von Karajan, Carlos Kleiber, James Levine, Carlo Maria Giulini, Seiji Ozawa, Claudio Abbado, Giuseppe Sinopoli, Kurt Masur, Leonard Bernstein, Lorin Maazel, André Previn, Karl Böhm, Sir John Eliot Gardiner, Zubin Mehta, Sir Georg Solti, Daniel Barenboim', author: '—', book: '—' },
+            { id: 9, files: ['09.png', '09-1.png'], count: 2, origin: 'Generali Classic Edition / Musicom, Милан и Вена, ℗ 1999; не для продажи', genre: 'классика, симфоническая', type: 'Монографический (Малер), концертная запись ORF, апрель 1999', comp: 'Малер', compOrig: 'Gustav Mahler', artist: 'Молодёжный оркестр имени Густава Малера, Франц Вельзер-Мёст', artistOrig: 'Gustav Mahler Jugendorchester, Franz Welser-Möst', author: '—', book: '—' },
+            { id: 10, files: ['10.png', '10-1.png'], count: 1, origin: 'Deutsche Grammophon / Universal, ℗ © 2009 (CD 480 3103)', genre: 'классика, опера', type: 'Сольный сборник арий и дуэтов «The Best of»', comp: 'Пуччини, Делиб, Моцарт, Доницетти, Беллини, Дворжак, Верди, Легар, Оффенбах, Григ', compOrig: 'Puccini, Delibes, Mozart, Donizetti, Bellini, Dvořák, Verdi, Lehár, Offenbach, Grieg', artist: 'Анна Нетребко; Элина Гаранча, Роландо Вильясон, Томас Квастхофф, Кристоф Штрель; Камерный оркестр Малера, Саксонская государственная капелла, Венские филармоники; Клаудио Аббадо, Джанандреа Нозеда, Себастьян Вайгле', artistOrig: 'Anna Netrebko; Elīna Garanča, Rolando Villazón, Thomas Quasthoff, Christoph Strehl; Mahler Chamber Orchestra, Staatskapelle Dresden, Wiener Philharmoniker u.a.; Claudio Abbado, Gianandrea Noseda, Sebastian Weigle u.a.', author: '—', book: '—' },
+            { id: 11, files: ['11.png', '11-1.png'], count: 1, origin: 'Documents (24 bit / 96 kHz), Германия; запись 1953', genre: 'классика, опера', type: 'Полная историческая запись', comp: 'Масканьи: «Сельская честь»', compOrig: 'Pietro Mascagni', artist: 'Мария Каллас, Джузеппе ди Стефано, Роландо Панераи, Анна Мария Канали, Эбе Тикоцци; оркестр и хор Ла Скала, Туллио Серафин', artistOrig: 'Maria Callas, Giuseppe di Stefano, Rolando Panerai, Anna Maria Canali, Ebe Ticozzi, Orchestra e Coro del Teatro alla Scala di Milano, Tullio Serafin', author: '—', book: '—' },
+            { id: 12, files: ['12.png', '12-1.png'], count: 1, origin: 'Slam Records, ℗ © 1995', genre: 'классика, опера', type: 'Сольный сборник арий «The Solo Collection»', comp: 'Пуччини, Доницетти, Верди, Россини', compOrig: 'Puccini, Donizetti, Verdi, Rossini', artist: 'Лучано Паваротти', artistOrig: 'Luciano Pavarotti', author: '—', book: '—' },
+            { id: 13, files: ['13.png', '13-1.png'], count: 1, origin: 'Slam Records, ℗ © 1995', genre: 'классика, опера', type: 'Сольный сборник арий «Solo Collection»', comp: 'Пуччини, Верди, Беллини', compOrig: 'Puccini, Verdi, Bellini', artist: 'Хосе Каррерас', artistOrig: 'Jose Carreras', author: '—', book: '—' },
+            { id: 14, files: ['14.png'], count: 1, origin: 'Die Klassik Sammlung, Германия (74\'02)', genre: 'классика, симфоническая', type: 'Монографический (Бетховен)', comp: 'Бетховен: Симфонии № 5 и № 6', compOrig: 'Beethoven', artist: '—', artistOrig: '—', author: '—', book: '—' },
+            { id: 15, files: ['15.png'], count: 1, origin: 'Die Klassik Sammlung, Германия (71\'21)', genre: 'классика', type: 'Монографический (Чайковский)', comp: 'Чайковский: Фортепианный концерт № 1, «Щелкунчик», «Лебединое озеро»', compOrig: 'Tschaikowsky', artist: '—', artistOrig: '—', author: '—', book: '—' },
+            { id: 16, files: ['16.png'], count: 1, origin: 'Die Klassik Sammlung, Германия', genre: 'классика', type: 'Монографический (Шопен); на обложке только имя', comp: 'Шопен', compOrig: 'Chopin', artist: '—', artistOrig: '—', author: '—', book: '—' },
+            { id: 17, files: ['17.png', '17-1.png'], count: 3, origin: 'Figaro Classics / Stemra', genre: 'классика, фортепианные концерты', type: 'Сборник «Romantic Piano Concertos»', comp: 'Бетховен, Шуман, Григ, Чайковский, Шопен', compOrig: 'Ludwig van Beethoven, Robert Schumann, Edvard Grieg, Pyotr Ilyitch Tchaikovsky, Frédéric Chopin', artist: 'Сёко Сугитани, Дубравка Томшич, Петер Топерчер, Ида Чернецка; Берлинские симфоники (Герард Оскамп), Philharmonia Slavonica (Альберто Лиццио), Словацкая филармония (Ладислав Словак, Либор Пешек)', artistOrig: 'Shoko Sugitani, Dubravka Tomsic, Peter Toperczer, Ida Czernecka; Berliner Symphoniker, Gerard Oskamp; Philharmonia Slavonica, Alberto Lizzio; Slovak Philharmonic Orchestra, Ladislav Slovak, Libor Pesek', author: '—', book: '—' },
+            { id: 18, files: ['18.png', '18-1.png'], count: 1, origin: 'Deutsche Grammophon (Resonance 429 168-2), ФРГ, ℗ 1967–70', genre: 'классика, опера', type: 'Избранные фрагменты тетралогии', comp: 'Вагнер: «Кольцо нибелунга»', compOrig: 'Richard Wagner', artist: 'Берлинские филармоники, Герберт фон Караян; Дональд Гроуб, Дитрих Фишер-Дискау, Жозефина Визи, Герхард Штольце, Йон Викерс, Томас Стюарт, Джесс Томас, Хельга Дернеш, Хельге Бриолит', artistOrig: 'Berliner Philharmoniker, Herbert von Karajan; Donald Grobe, Dietrich Fischer-Dieskau, Josephine Veasey, Gerhard Stolze, Jon Vickers, Thomas Stewart, Jess Thomas, Helga Dernesch, Helge Brilioth', author: '—', book: '—' },
+            { id: 19, files: ['19.png', '19-1.png', '19-2.png'], count: 6, origin: 'Deutsche Grammophon, ФРГ, записи 1982–85 (415 066-2)', genre: 'классика, симфоническая', type: 'Полное собрание симфоний с увертюрами (два бокса по 3 CD)', comp: 'Бетховен: 9 симфоний, увертюры «Кориолан», «Леонора III», «Фиделио», «Эгмонт»', compOrig: 'Ludwig van Beethoven', artist: 'Берлинские филармоники, Герберт фон Караян; Джанет Перри, Агнес Бальца, Винсон Коул, Хосе ван Дам; Венский Зингферайн (хормейстер Гельмут Фрошауэр)', artistOrig: 'Berliner Philharmoniker, Herbert von Karajan; Janet Perry, Agnes Baltsa, Vinson Cole, José van Dam; Wiener Singverein, Helmuth Froschauer', author: '—', book: '—' },
+            { id: 20, files: ['20.png', '20-1.png', '20-2.png'], count: 5, origin: 'ФРГ, цифровая запись (PLU 1147)', genre: 'классика', type: 'Антология популярных пьес «Ausgewählte Meisterwerke der klassischen Musik»', comp: 'Бах, Моцарт, Бетховен (по портретам на обложке)', compOrig: '— (имена в списке пьес не указаны)', artist: '—', artistOrig: '—', author: '—', book: '—' },
+            { id: 21, files: ['21.png', '21-1.png'], count: 1, origin: 'EMI Electrola, 1964, ремастеринг 1990, Швейцария (CDZ 25 2219 2)', genre: 'классика, опера', type: 'Избранные сцены (серия Kostbarkeiten)', comp: 'Лорцинг: «Браконьер»', compOrig: 'Albert Lortzing', artist: 'Герман Прей, Гизела Литц, Фриц Вундерлих, Аннелизе Ротенбергер, Гертруд Фордемфельде, Фриц Ольлендорф, Лотте Шедле, Карл-Хайнц Шмидтпетер, детский хор; хор и оркестр Баварской государственной оперы, Роберт Хегер', artistOrig: 'Hermann Prey, Gisela Litz, Fritz Wunderlich, Anneliese Rothenberger, Gertrud Vordemfelde, Fritz Ollendorff, Lotte Schädle, Karl-Heinz Schmidtpeter, Ein Kinderchor, Chor der Bayerischen Staatsoper München, Bayerisches Staatsorchester, Robert Heger', author: '—', book: '—' },
+            { id: 22, files: ['22.png', '22-1.png'], count: 1, origin: 'Sony Classical (Essential Classics, SBK 46343), © 1990, записи 1981', genre: 'классика, камерная', type: 'Сборник двух произведений (Шуберт)', comp: 'Шуберт: «Форельный квинтет», квартет № 14 «Смерть и девушка»', compOrig: 'Franz Schubert', artist: 'Участники Будапештского квартета: Джозеф Ройсман, Борис Кройт, Миша Шнайдер; Юлиус Левин, Мечислав Хоршовский; квартет Джульярд', artistOrig: 'Members of the Budapest String Quartet: Joseph Roisman, Boris Kroyt, Mischa Schneider; Julius Levine, Mieczyslaw Horszowski; Juilliard String Quartet', author: '—', book: '—' },
+            { id: 23, files: ['23.png', '23-1.png'], count: 2, origin: 'edel records / Tchibo, Германия, 2006; записи 1971–92 (Art. 235967)', genre: 'классика, барокко', type: 'Монографический (Вивальди) «Zeit für Entspannung»', comp: 'Вивальди', compOrig: 'Vivaldi', artist: 'Герберт Кегель, Рундфункский камерный оркестр Лейпцига; Экарт Хаупт, Дрезденские солисты барокко, Петер Шрайер; Томас Зехетмайр, Камерата Берн; Бурхард Глетцнер, Камерный оркестр Берлина, Хартмут Хэнхен; Эрвин Кречмар; Иоганнес Вальтер, Камерный оркестр Веймарской капеллы, Фридеман Бетцель; Манфред Шерцер, Гельмут Кох; гитарный дуэт Клаус и Райнер Фельдманн; Neues Bachisches Collegium Musicum', artistOrig: 'Rundfunk-Kammerorchester Leipzig, Herbert Kegel; Eckart Haupt, Dresdner Barocksolisten, Peter Schreier; Thomas Zehetmair, Camerata Bern; Burkhard Glaetzner, Kammerorchester Berlin, Hartmut Haenchen; Erwin Kretzschmar; Johannes Walter, Kammerorchester der Staatskapelle Weimar, Friedemann Bätzel; Manfred Scherzer, Helmut Koch; Gitarren-Duo Klaus Feldmann & Rainer Feldmann; Neues Bachisches Collegium Musicum', author: '—', book: '—' },
+            { id: 24, files: ['24.png', '24-1.png'], count: 1, origin: 'arvato Bertelsmann / Tchibo, © 2013 (Art. 300803)', genre: 'лёгкая классика, релакс', type: 'Тематический сборник «Classic Relax», 12 треков', comp: 'Мендельсон-Бартольди, Чайковский, Жан-Поль Жанре, Прокофьев, Дебюсси, Жан-Пьер Гараттони, Лист, Бах', compOrig: 'Felix Mendelsohn-Bartholdy, Peter I. Tschaikowsky, Jean-Paul Genrè, Sergej Prokofiev, Claude Debussy, Jean-Pierre Garattoni, Franz Liszt, Johann Sebastian Bach', artist: 'Симфонический оркестр Бамберга, Ханс Калафуш, Клаус фон Вильдеманн, Люксембургский радиосимфонический оркестр, Радиосимфонический оркестр ORF, Хелене Галь, Майнцский камерный оркестр', artistOrig: 'Symphonisches Orchester Bamberg, Bamberger Symphoniker, Hans Kalafusz, Klaus von Wildemann, Radio Symphonie-Orchester Luxemburg, ORF Radiosymphonieorchester, Helene Gal, Mainzer Kammerorchester', author: '—', book: '—' },
+            { id: 25, files: ['25.png', '25-1.png'], count: 2, origin: 'EMI Classics (Gemini), запись 1979, © 2003', genre: 'классика, фортепиано', type: 'Монографический (Бетховен)', comp: 'Бетховен: сонаты № 29–32, 6 багателей op. 126', compOrig: 'Ludwig van Beethoven', artist: 'Кристоф Эшенбах', artistOrig: 'Christoph Eschenbach', author: '—', book: '—' },
+            { id: 26, files: ['26.png', '26-1.png'], count: 2, origin: 'Sony Music / Tchibo, © 2009 (Art. 260477)', genre: 'классика, симфоническая', type: 'Сборник симфоний «Festliche Sinfonien»', comp: 'Гайдн, Моцарт, Бетховен, Шуберт, Чайковский', compOrig: 'Joseph Haydn, Wolfgang Amadeus Mozart, Ludwig van Beethoven, Franz Schubert, Pjotr Iljitsch Tschaikowski', artist: 'Оркестр Musici di San Marco; оркестр Брукнера (Линц), Мартин Зигхарт; оркестр Тонхалле Цюрих, Дэвид Зинман; Лондонский филармонический и Бамбергские симфоники, Хорст Штайн', artistOrig: 'Orchestra Musici di San Marco; Bruckner Orchester Linz, Martin Sieghart; Tonhalle Orchester Zürich, David Zinman; The London Philharmonic Orchestra, Bamberger Symphoniker, Horst Stein', author: '—', book: '—' },
+            { id: 27, files: ['27.png', '27-2.png'], count: 1, origin: 'Columbia / Sony Music, © 1994 (COL 477342 2)', genre: 'поп, рождественская музыка', type: 'Тематический альбом «Merry Christmas», 11 треков', comp: 'Рождественские песни и гимны (авторы не указаны)', compOrig: '—', artist: 'Мэрайя Кэри', artistOrig: 'Mariah Carey', author: '—', book: '—' },
+            { id: 28, files: ['28.png', '28-1.png'], count: 1, origin: 'Warner / EastWest, Германия (0630-17255-2)', genre: 'поп-классика (кроссовер)', type: 'CD-сингл с бонус-треком, трибьют Генри Маске', comp: '—', compOrig: '—', artist: 'Сара Брайтман и Андреа Бочелли', artistOrig: 'Sarah Brightman & Andrea Bocelli', author: '—', book: '—' },
+            { id: 29, files: ['29.png', '29-1.png'], count: 1, origin: 'Eurodisc / BMG Ariola, Германия, © 1990 (GD 69093)', genre: 'классика, духовная хоровая', type: 'Сборник «Festliche Chöre Vol. 1»', comp: 'Бетховен, Бах (обработка), Моцарт, Гайдн, Бизе, Алессандро Скарлатти, Орландо ди Лассо, Карл Кемптер', compOrig: 'Ludwig van Beethoven, J. S. Bach, Wolfgang Amadeus Mozart, Joseph Haydn, Georges Bizet, Alessandro Scarlatti, Orlando di Lasso, Karl Kempter', artist: 'Хор собора св. Гедвиги (Берлин), Роланд Бадер, Карл Форстер', artistOrig: 'Chor der St. Hedwigs-Kathedrale, Berlin; Roland Bader; Karl Forster', author: '—', book: '—' },
+            { id: 30, files: ['30.png', '30-1.png'], count: 1, origin: 'Classic Options (CO 3502), Бельгия', genre: 'классика, опера', type: 'Сольный сборник арий, живые записи («Best Recordings 2»)', comp: 'Россини, Верди, Доницетти, Тома, Беллини, Керубини, Бизе', compOrig: 'Rossini, Verdi, Donizetti, Thomas, Bellini, Cherubini, Bizet', artist: 'Мария Каллас, Марио дель Монако; дирижёры Жорж Претр, Оливьеро де Фабритиис, Герберт фон Караян, Альфредо Симонетто, Артуро Базиле, Туллио Серафин', artistOrig: 'Maria Callas; With Mario Del Monaco; Georges Prêtre, Oliviero De Fabritius, Herbert von Karajan, Alfredo Simonetto, Arturo Basile, Tullio Serafin', author: '—', book: '—' },
+            { id: 31, files: ['31.png', '31-1.png'], count: 1, origin: 'Deutsche Grammophon / Universal, ℗ 2003 (474 240-2)', genre: 'классика, опера', type: 'Сольный сборник арий «Opera Arias»', comp: 'Моцарт, Берлиоз, Массне, Доницетти, Беллини, Гуно, Дворжак, Пуччини', compOrig: 'Mozart, Berlioz, Massenet, Donizetti, Bellini, Gounod, Dvořák, Puccini', artist: 'Анна Нетребко, хор Венской государственной оперы, Венские филармоники, Джанандреа Нозеда', artistOrig: 'Anna Netrebko; Wiener Staatsopernchor; Wiener Philharmoniker; Gianandrea Noseda', author: '—', book: '—' },
+            { id: 32, files: ['32.png', '32-1.png'], count: 1, origin: 'Classic Options (CO 3501), Бельгия', genre: 'классика, опера', type: 'Сольный сборник арий, живые записи («Best Recordings 1»)', comp: 'Россини, Пуччини, Доницетти, Беллини, Делиб, Шарпантье, Верди', compOrig: 'Rossini, Puccini, Donizetti, Bellini, Delibes, Charpentier, Verdi', artist: 'Мария Каллас; дирижёры Никола Решиньо, Димитрис Митропулос, Герберт фон Караян, Альфредо Симонетто, Оливьеро де Фабритиис, сэр Малкольм Сарджент, Антонио Вотто', artistOrig: 'Maria Callas; Nicola Rescigno, Dimitri Mitropoulos, Herbert von Karajan, Alfredo Simonetto, Oliviero De Fabritius, Sir Malcolm Sargent, Antonio Votto', author: '—', book: '—' },
+            { id: 33, files: ['33.png', '33-1.png'], count: 1, origin: 'Deutsche Grammophon (Classikon 27, 439 484-2), ℗ 1962 и 1966', genre: 'классика', type: 'Сборник двух произведений (Дворжак)', comp: 'Дворжак: Концерт для виолончели, Симфония № 8', compOrig: 'Antonín Dvořák', artist: 'Пьер Фурнье, Джордж Сэлл; Берлинские филармоники, Рафаэль Кубелик', artistOrig: 'Pierre Fournier, George Szell; Berliner Philharmoniker, Rafael Kubelik', author: '—', book: '—' },
+            { id: 34, files: ['34.png', '34-1.png'], count: 1, origin: 'Erato / Warner, Sugar (Insieme), Милан, ℗ 1999', genre: 'кроссовер (опера и поп)', type: 'Сольный альбом, 12 треков', comp: 'Беллини, Сен-Санс, Пуччини, Бизе, Верди (по названиям опер)', compOrig: '— (на упаковке только названия опер)', artist: 'Филиппа Джордано', artistOrig: 'Filippa Giordano', author: '—', book: '—' },
+            { id: 35, files: ['35.png', '35-1.png'], count: 1, origin: 'Германия', genre: 'опера, оперетта, кино', type: 'Концертный сборник «Galakonzert», 16 треков', comp: 'Бизе, Флотов, Вольф-Феррари, Вагнер, Масканьи, Пуччини, Оффенбах, Гуно', compOrig: 'Bizet, Flotow, Wolf Ferrari, Wagner, Mascagni, Puccini, Offenbach, Gounod', artist: 'Ханс Дитер Бадер; почётная гостья Хелен Донат', artistOrig: 'Hans Dieter Bader; Ehrengast Helen Donath', author: '—', book: '—' },
+            { id: 36, files: ['36.png', '36-1.png'], count: 2, origin: 'Sony Music Media, © 2004 (SMM 4674750)', genre: 'поп, рок-баллады', type: 'Сборник «Kuschelrock 4», 2 × 16 треков', comp: '—', compOrig: '—', artist: 'Шинейд О\'Коннор, Арт Гарфанкел, Roxette, Майкл Болтон, Тина Тёрнер, Джо Кокер, Simon & Garfunkel, Гэри Мур и др.', artistOrig: 'Sinead O\'Connor, Art Garfunkel, Roxette, Michael Bolton, Tina Turner, Joe Cocker, Simon & Garfunkel, Gary Moore u.v.m.', author: '—', book: '—' },
+            { id: 37, files: ['37.png', '37-1.png'], count: 3, origin: 'Der Club Bertelsmann / Sonocord, © 2005 (383810)', genre: 'классика, фортепианные концерты', type: 'Монографический (Моцарт), Edition Mozart', comp: 'Моцарт: концерты для фортепиано № 18, 20, 21, 22, 23, 27 (см. примечания)', compOrig: 'Wolfgang Amadeus Mozart', artist: 'Рудольф Бухбиндер, Аннерозе Шмидт, Курт Мазур', artistOrig: 'Rudolf Buchbinder, Annerose Schmidt, Kurt Masur', author: '—', book: '—' },
+            { id: 38, files: ['38.png', '38-1.png'], count: 1, origin: 'Master Tone / MCPS, © 1997', genre: 'мюзикл', type: 'Сборник «Your Favorite Musical Collection 2», 16 треков', comp: '—', compOrig: '—', artist: '—', artistOrig: '—', author: '—', book: '—' },
+            { id: 39, files: ['39.png', '39-1.png'], count: 1, origin: 'Strato Digital Classics / Interphon, Германия, ℗ 1992 (ST 10.045)', genre: 'классика, оркестровая', type: 'Монографический (Вагнер), увертюры', comp: 'Вагнер', compOrig: 'Richard Wagner', artist: 'Лондонский фестивальный оркестр, Лондонский симфонический оркестр, Альфред Шольц', artistOrig: 'London Festival Orchestra, London Symphony Orchestra, Alfred Scholz', author: '—', book: '—' },
+            { id: 40, files: ['40.png', '40-1.png'], count: 1, origin: 'Point Classics, © 1994 (2650442), печать в Германии', genre: 'классика, фортепиано', type: 'Монографический (Шопен), 12 ноктюрнов', comp: 'Шопен', compOrig: 'F. Chopin', artist: 'Виталий Маргулис', artistOrig: 'Vitalij Margulis', author: '—', book: '—' },
+            { id: 41, files: ['41.png', '41-1.png'], count: 1, origin: 'Deutsche Grammophon (Eloquence, 457 922-2), ℗ 1965', genre: 'классика, фортепиано', type: 'Монографический (Бетховен), 61:18', comp: 'Бетховен: сонаты № 14 «Лунная», 17 «Буря», 23 «Аппассионата»', compOrig: 'Ludwig van Beethoven', artist: 'Вильгельм Кемпф', artistOrig: 'Wilhelm Kempff', author: '—', book: '—' },
+            { id: 42, files: ['42.png', '42-1.png'], count: 1, origin: 'VMK globe / Mediaphon, ФРГ, 1989 (The World of the Classics, 100.41816)', genre: 'классика', type: 'Монографический сборник (Бетховен), 63\'44', comp: 'Бетховен: финал Симфонии № 9, «Лунная» соната, увертюра «Афинские развалины», квартет op. 130', compOrig: 'Ludwig van Beethoven', artist: 'Магдалена Палочаи, Ева Бандова, Петер Коттвальд, Йозеф Бачек; Festival Choir и Festival Orchestra, Альберто Лиццио; Дубравка Томшич; Лондонский фестивальный оркестр, Курт Редель; квартет Кёккерта', artistOrig: 'Magdalena Paloczaj, Eva Bandova, Peter Kottwald, Josef Bacek, Festival Choir, Festival Orchestra (Alberto Lizzio), Dubravka Tomšič, London Festival Orchestra (Kurt Redel), Köckert-Quartett', author: '—', book: '—' },
+            { id: 43, files: ['43.png', '43-1.png', '43-2.png'], count: 3, origin: 'Tandem Verlag, Кёнигсвинтер, 2001/2002', genre: 'аудиокнига, сатира', type: 'Сборник рассказов, около 206 мин.', comp: '—', compOrig: '—', artist: 'Чтец: Бернд Штефан', artistOrig: 'Der Sprecher: Bernd Stephan', author: 'Эфраим Кишон', book: '«Aufgeweckte Gute-Nacht-Geschichten» (включает «Eintagsfliegen leben länger» и «Kishon zum Einschlafen»)' },
+            { id: 44, files: ['44.png', '44-1.png'], count: 2, origin: 'CBS Schallplatten, Германия, © 1989 (465952 2)', genre: 'поп, рок-баллады', type: 'Сборник «Die neue Kuschelrock», 33 песни', comp: '—', compOrig: '—', artist: 'Фил Коллинз, Барри Манилоу, Эрик Кармен, Breathe, Джордж Майкл, Nazareth, Foreigner, Genesis, Тина Тёрнер, Scorpions, Sade и др.', artistOrig: 'Phil Collins, Barry Manilow, Eric Carmen, Breathe, George Michael, Nazareth, Foreigner, Genesis, Tina Turner, Scorpions, Sade …', author: '—', book: '—' },
+            { id: 45, files: ['45.png', '45-1.png'], count: 4, origin: 'Random House Audio, ℗ 2015, © 2016, около 5 ч 13 мин., сокращённое чтение', genre: 'аудиокнига, литература (роман)', type: 'Сокращённая аудиоверсия', comp: '—', compOrig: '—', artist: 'Чтец: Ханнелоре Хогер', artistOrig: 'Gelesen von Hannelore Hoger', author: 'Дёрте Хансен', book: '«Altes Land»' },
+            { id: 46, files: ['46.png', '46-1.png'], count: 1, origin: 'Music Digital / Delta Music, Фрехен, 1996 (11 968)', genre: 'классика, оркестровая', type: 'Сборник «Stars der Klassik» (серия Meisterwerke)', comp: 'Мусоргский, Брукнер, Дворжак, Брамс, Бизе, Чайковский, Берлиоз, Иоганн Штраус-отец', compOrig: 'Modest Mussorgsky, Anton Bruckner, Antonin Dvorak, Johannes Brahms, Georges Bizet, Peter Tschaikowsky, Hector Berlioz, Johann Strauß I', artist: 'Риккардо Мути, Эуген Йохум, Чарлз Маккеррас, Рудольф Кемпе, Иегуди Менухин, Герберт фон Караян, Андре Превин; Филадельфийский оркестр, Саксонская государственная капелла, Лондонский филармонический оркестр, Берлинские филармоники, оркестр «Филармония» (Лондон), Лондонский симфонический оркестр, Венские филармоники', artistOrig: 'Riccardo Muti, Eugen Jochum, Sir Charles Mackerras, Rudolf Kempe, Sir Yehudi Menuhin, Herbert von Karajan, André Previn; Philadelphia Orchestra, Staatskapelle Dresden, London Philharmonic Orchestra, Berliner Philharmoniker, Philharmonia Orchestra London, London Symphony Orchestra, Wiener Philharmoniker', author: '—', book: '—' },
+            { id: 47, files: ['47.png', '47-1.png'], count: 2, origin: 'Германия (CD 1: 74:37, CD 2: 72:43)', genre: 'классика, симфоническая', type: 'Сборник частей симфоний «Festliche Sinfonien» (другое издание)', comp: 'Моцарт, Бетховен, Шуберт, Бах, Мендельсон-Бартольди, Григ, Малер, Дворжак, Брамс, Чайковский, Римский-Корсаков, Гайдн', compOrig: 'Wolfgang Amadeus Mozart, Ludwig van Beethoven, Franz Schubert, Johann Sebastian Bach, Felix Mendelssohn-Bartholdy, Edvard Grieg, Gustav Mahler, Antonin Dvorak, Johannes Brahms, Pyotr Il\'itsch Tchaikovsky, Nikolai Rimsky-Korsakov, Joseph Haydn', artist: 'Альфред Шольц, Здеслав Кошлер, Карл Бём, Быстрик Ружуха, Уильям Болдэн, Мартин Хазельбёк, Йорг Фаербер, Джулиан Армстронг, Либор Пешек, Гарольд Фарберман, Ганс Сваровски, Луи де Фромен, Рейнхард Петерс, Иштван Кертес; Лондонский филармонический, Лондонский симфонический, Словацкие оркестры, Королевский оркестр Консертгебау, Венская академия, Вюртембергский камерный, Бамбергский симфонический, Гамбургский симфонический оркестры', artistOrig: 'Alfred Scholz, Zdenek Kosler, Karl Böhm, Bystrik Rezucha, William Baiden, Martin Haselböck, Jörg Faerber, Julian Armstrong, Libor Pesek, Harold Farberman, Hans Swarowsky, Louis de Froment, Reinhard Peters, Istvan Kertesz; London Philharmonic Orchestra, London Symphony Orchestra, Slovak Philharmonic Orchestras, Royal Concertgebouw Orchestra, Wiener Akademie, Württemberg Chamber Orchestra, Bamberg Symphony Orchestra, Hamburg Symphony Orchestra', author: '—', book: '—' },
+            { id: 48, files: ['48.png', '48-1.png'], count: 1, origin: 'Mediaphon (Voller Klang, MED 22.332), Штутгарт, 1993', genre: 'классика, оркестровая и хоровая', type: 'Монографический (Бизе)', comp: 'Бизе: сюиты «Кармен» № 1 и 2, сюита «Арлезианка», Te Deum', compOrig: 'Bizet', artist: 'Радиосимфонический оркестр Парижа, Луик Бертран; Кари Лёваас, Зигфрид Иерусалем, Philharmonia-Chor, Штутгартские филармоники, Ханс Занотелли', artistOrig: 'Radio-Symphonieorchester Paris, Loïc Bertrand; Kari Lövaas, Siegfried Jerusalem, Philharmonia-Chor, Stuttgarter Philharmoniker, Hans Zanotelli', author: '—', book: '—' },
+            { id: 49, files: ['49.png', '49-1.png'], count: 1, origin: 'Самодеятельная запись, Лангенхаген, концерт 23.04.2009', genre: 'поп, эстрада, джаз', type: 'Концертный альбом «Music was my first love», 8 треков', comp: 'Джабара/Шаффер, П. Б. Руис, Х. Кармайкл, Дж. Бон Джови, Д. Элфман, Р. Ньюман, ABBA, Дж. Майлз', compOrig: 'Jabara/Schaffer, P. B. Ruiz, H. Carmichael, J. B. Jovi, D. Elfman, R. Newman, ABBA, J. Miles', artist: 'The Melody Ladies & Rhythm Gentlemen', artistOrig: 'the melody ladies & rhythm gentlemen', author: '—', book: '—' },
+            { id: 50, files: ['50.png', '50-1.png'], count: 1, origin: 'EMI Electrola (CDP 538-1598732), серия Compact Price', genre: 'инструментальная эстрада', type: 'Сборник «Gold Hits Instrumental», 16 треков', comp: '—', compOrig: '—', artist: 'Хуго Штрассер и его танцевальный оркестр, Марек и Вацек, Хельмут Захариас, Berry Lipman Band, Пауль Кун, Мило Павлович, студийный оркестр Ферди Кляйна, Эрих Сигал, Текс Шульциг, Хорст Янковски (оркестр RIAS), Ади Цеппфеннинг, Фред Шультхайс, Гюнтер Норис, Франц Ламберт, Хайнц Шахтнер, Макс Грегер мл.', artistOrig: 'Hugo Strasser und sein Tanzorchester, Marek & Vacek, Helmut Zacharias, Berry Lipman Band, Paul Kuhn, Milo Pavlovic, Studio-Orchester Ferdy Klein, Erich Segal, Tex Shultzieg, Horst Jankowski mit dem RIAS Tanzorchester, Ady Zehnpfennig, Fred Schultheiss, Günter Noris, Franz Lambert, Heinz Schachtner und sein Orchester, Max Greger jun.', author: '—', book: '—' },
+            { id: 51, files: ['51.png', '51-1.png'], count: 1, origin: 'Music Digital / Delta Music, Фрехен, 1996 (11 967)', genre: 'классика, оркестровая', type: 'Сборник «Große Dirigenten» (серия Meisterwerke)', comp: 'Моцарт, Чайковский, Шуман, Бетховен, Шуберт', compOrig: 'W. A. Mozart, Peter Tschaikowsky, Robert Schumann, Ludwig van Beethoven, Franz Schubert', artist: 'Шандор Вег, Камерата Зальцбург; Карло Мария Джулини, оркестр «Филармония»; Невилл Маррайнер, Радиосимфонический оркестр Штутгарта; Константин Сильвестри, Венские филармоники, Иегуди Менухин; Риккардо Мути, оркестр «Филармония» (Лондон); Джордж Сэлл, Кливлендский оркестр', artistOrig: 'Sandor Vegh, Camerata Salzburg; Carlo Maria Giulini, Philharmonia Orchestra; Sir Neville Marriner, Radio-Sinfonieorchester Stuttgart; Constantin Silvestri, Wiener Philharmoniker, Sir Yehudi Menuhin; Riccardo Muti, Philharmonia Orchestra London; George Szell, Cleveland Orchestra', author: '—', book: '—' },
+            { id: 52, files: ['52.png', '52-1.png'], count: 1, origin: 'EMI Digital (CDM 4 89473 2), ℗ 1989', genre: 'классика, оркестровая', type: 'Монографический (Дворжак), 79\'26', comp: 'Дворжак: Славянские танцы op. 46 и 72', compOrig: 'Antonín Dvořák', artist: 'Берлинские филармоники, Лорин Маазель', artistOrig: 'Berliner Philharmoniker, Lorin Maazel', author: '—', book: '—' },
+            { id: 53, files: ['53.png', '53-1.png'], count: 1, origin: 'Seraphim / EMI, компиляция 1996 (записи 1979 и 1989)', genre: 'классика, концерты', type: 'Сборник двух концертов (Дворжак)', comp: 'Дворжак: Концерт для виолончели, Концерт для скрипки', compOrig: 'Antonín Dvořák', artist: 'Поль Тортелье, Андре Превин, Лондонский симфонический оркестр; Кён Хва Чон, Филадельфийский оркестр, Риккардо Мути', artistOrig: 'Paul Tortelier, André Previn, London Symphony Orchestra; Kyung-Wha Chung, The Philadelphia Orchestra, Riccardo Muti', author: '—', book: '—' },
+            { id: 54, files: ['54.png', '54-1.png'], count: 1, origin: 'EMI Classics, компиляция 1995 (50:11)', genre: 'классика, скрипка', type: 'Сольный сборник «Meditation»', comp: 'Вивальди, Моцарт, Массне, Сарасате', compOrig: 'Antonio Vivaldi, Wolfgang Amadeus Mozart, Jules Massenet, Pablo de Sarasate', artist: 'Анне-Софи Муттер; Венские филармоники, оркестр «Филармония», Берлинские филармоники, Национальный оркестр Франции; Герберт фон Караян, Риккардо Мути, Сэйдзи Одзава; Уильям Тим Рид, Рудольф Шольц, Вернер Хинк', artistOrig: 'Anne-Sophie Mutter; Wiener Philharmoniker, Philharmonia Orchestra, Berliner Philharmoniker, Orchestre National de France; Herbert von Karajan, Riccardo Muti, Seiji Ozawa; William Tim Read, Rudolf Scholz, Werner Hinck', author: '—', book: '—' },
+            { id: 55, files: ['55.png', '55-1.png'], count: 1, origin: 'EMI Classics (Studio Plus, CDM 4894722), записи 1977 и 1979', genre: 'классика, симфоническая', type: 'Монографический (Дворжак), 77:57', comp: 'Дворжак: Симфонии № 8 и № 9', compOrig: 'Antonín Dvořák', artist: 'Берлинские филармоники, Герберт фон Караян', artistOrig: 'Berliner Philharmoniker, Herbert von Karajan', author: '—', book: '—' },
+            { id: 56, files: ['56.png', '56-1.png', '56-2.png'], count: 3, origin: 'Laserlight / Delta Music, Фрехен, 1993 (55 532)', genre: 'классика, рождественская и духовная', type: 'Тематический набор «In Dulci Jubilo»', comp: 'Чайковский, Моцарт, Гендель, Шуберт, Гуно, Бах, Мендельсон-Бартольди, Брукнер, Кребс, Кауфман, Олкок, Корретт', compOrig: 'Tschaikowsky, Mozart, Händel, Schubert, Gounod, Bach, Mendelssohn-Bartholdy, Bruckner, Krebs, Kauffmann, Alcock, Corrette', artist: '— (на упаковке не указаны)', artistOrig: '—', author: '—', book: '—' },
+            { id: 57, files: ['57.png', '57-1.png'], count: 3, origin: 'Der Club Bertelsmann / Sonocord, © 2005 (383844)', genre: 'классика, симфоническая', type: 'Монографический (Моцарт), Edition Mozart', comp: 'Моцарт: симфонии № 29, 31, 38, 39, 40, 41', compOrig: 'Wolfgang Amadeus Mozart', artist: 'Вольфганг Заваллиш, Чешская филармония', artistOrig: 'Wolfgang Sawallisch, Tschechische Philharmonie', author: '—', book: '—' },
+            { id: 58, files: ['58.png', '58-1.png'], count: 2, origin: 'EMI Classics (CMS 7 64650 2), ℗ 1984, © 1993', genre: 'классика, опера', type: 'Полная запись оперы', comp: 'Вагнер: «Летучий голландец»', compOrig: 'Richard Wagner', artist: 'Хосе ван Дам, Курт Молль, Дуня Вейзович, Томас Мозер, Кая Боррис, Хофман (только на лицевой стороне); хор Венской государственной оперы, Берлинские филармоники, Герберт фон Караян', artistOrig: 'José van Dam, Kurt Moll, Dunja Vejzovic, Thomas Moser, Kaja Borris; Hofmann (на лицевой стороне); Konzertvereinigung Wiener Staatsopernchor, Berliner Philharmoniker, Herbert von Karajan', author: '—', book: '—' },
+            { id: 59, files: ['59.png', '59-1.png'], count: 1, origin: 'Slam Records, ℗ © 1995', genre: 'классика, опера', type: 'Сольный сборник арий «The Solo Collection»', comp: 'Леонкавалло, Пуччини, Бизе, Массне, Верди, Доницетти', compOrig: 'Leoncavallo, Puccini, Bizet, Massenet, Verdi, Donizetti', artist: 'Пласидо Доминго', artistOrig: 'Placido Domingo', author: '—', book: '—' }
+        ];
+
+        // Рендер таблицы
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            catalogData.forEach(item => {
+                const tr = document.createElement('tr');
+
+                // 1. ID
+                const tdId = document.createElement('td');
+                tdId.textContent = item.id;
+
+                // 2. Превью
+                const tdFiles = document.createElement('td');
+                item.files.forEach((fileName, index) => {
+                    const fullPath = BASE_PATH + fileName;
+                    
+                    const img = document.createElement('img');
+                    img.src = fullPath;
+                    img.className = 'thumbnail';
+                    img.alt = fileName; 
+                    
+                    img.onerror = function() { this.style.display = 'none'; };
+                    img.onclick = function() { openModal(fullPath); };
+                    
+                    tdFiles.appendChild(img);
+                });
+
+                // 3. Дисков
+                const tdCount = document.createElement('td');
+                tdCount.textContent = item.count;
+
+                // 4. Происхождение
+                const tdOrigin = document.createElement('td');
+                tdOrigin.textContent = item.origin;
+
+                // 5. Жанр
+                const tdGenre = document.createElement('td');
+                tdGenre.textContent = item.genre;
+
+                // 6. Тип подборки
+                const tdType = document.createElement('td');
+                tdType.textContent = item.type;
+
+                // 7. Композиторы (RU)
+                const tdComp = document.createElement('td');
+                tdComp.textContent = item.comp;
+
+                // 8. Композиторы (оригинал)
+                const tdCompOrig = document.createElement('td');
+                tdCompOrig.textContent = item.compOrig;
+
+                // 9. Исполнители (RU)
+                const tdArtist = document.createElement('td');
+                tdArtist.textContent = item.artist;
+
+                // 10. Исполнители (оригинал)
+                const tdArtistOrig = document.createElement('td');
+                tdArtistOrig.textContent = item.artistOrig;
+
+                // 11. Автор
+                const tdAuthor = document.createElement('td');
+                tdAuthor.textContent = item.author;
+
+                // 12. Книга
+                const tdBook = document.createElement('td');
+                tdBook.textContent = item.book;
+
+                // Собираем строку
+                tr.appendChild(tdId);
+                tr.appendChild(tdFiles);
+                tr.appendChild(tdCount);
+                tr.appendChild(tdOrigin);
+                tr.appendChild(tdGenre);
+                tr.appendChild(tdType);
+                tr.appendChild(tdComp);
+                tr.appendChild(tdCompOrig);
+                tr.appendChild(tdArtist);
+                tr.appendChild(tdArtistOrig);
+                tr.appendChild(tdAuthor);
+                tr.appendChild(tdBook);
+
+                tbody.appendChild(tr);
+            });
+
+            // Заполняем фильтры после рендера таблицы
+            populateFilters();
+        }
+
+        // Заполнение выпадающих списков
+        function populateFilters() {
+            const genreSet = new Set();
+            const composerRuSet = new Set();
+            const composerOrigSet = new Set();
+            const artistSet = new Set();
+
+            catalogData.forEach(item => {
+                // Жанры - очищаем от пробелов и дублей
+                if (item.genre && item.genre !== '—') {
+                    item.genre.split(',').forEach(g => {
+                        const cleanGenre = g.trim().toLowerCase();
+                        if (cleanGenre) genreSet.add(cleanGenre);
+                    });
+                }
+                
+                // Композиторы (оригинал)
+                if (item.compOrig && item.compOrig !== '—') {
+                    item.compOrig.split(',').forEach(c => {
+                        const cleanComp = c.trim();
+                        if (cleanComp) {
+                            composerOrigSet.add(cleanComp);
+                            
+                            // Переводим на русский для второго списка
+                            let ruName = cleanComp;
+                            // Убираем инициалы и лишнее для поиска в словаре
+                            const baseName = cleanComp.replace(/[^a-zA-Zа-яА-ЯёЁäöüß\s]/g, '').trim();
+                            
+                            // Ищем в словаре
+                            for (const [key, value] of Object.entries(composerTranslation)) {
+                                if (baseName.includes(key) || key.includes(baseName)) {
+                                    ruName = value;
+                                    break;
+                                }
+                            }
+                            composerRuSet.add(ruName);
+                        }
+                    });
+                }
+
+                // Исполнители
+                if (item.artist && item.artist !== '—') {
+                    item.artist.split(/[,;]/).forEach(a => {
+                        const cleanArtist = a.trim();
+                        if (cleanArtist) artistSet.add(cleanArtist);
+                    });
+                }
+            });
+
+            fillSelect('filter-genre', genreSet);
+            fillSelect('filter-composer-ru', composerRuSet);
+            fillSelect('filter-composer-orig', composerOrigSet);
+            fillSelect('filter-artist', artistSet);
+        }
+
+        function fillSelect(selectId, itemsSet) {
+            const select = document.getElementById(selectId);
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            const sorted = Array.from(itemsSet).sort((a, b) => a.localeCompare(b));
+            sorted.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                select.appendChild(opt);
+            });
+        }
+
+        // Фильтрация по всем полям
+        function filterTable() {
+            const searchQuery = document.getElementById('search-box').value.toLowerCase();
+            const genreFilter = document.getElementById('filter-genre').value.toLowerCase();
+            const composerRuFilter = document.getElementById('filter-composer-ru').value.toLowerCase();
+            const composerOrigFilter = document.getElementById('filter-composer-orig').value.toLowerCase();
+            const artistFilter = document.getElementById('filter-artist').value.toLowerCase();
+
+            const rows = document.getElementById('tableBody').getElementsByTagName('tr');
+            let visibleCount = 0;
+
+            Array.from(rows).forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                
+                // Текст всей строки для поиска
+                const rowText = Array.from(cells).map(c => c.textContent.toLowerCase()).join(' ');
+                
+                const genreText = cells[4] ? cells[4].textContent.toLowerCase() : '';
+                const compOrigText = cells[7] ? cells[7].textContent.toLowerCase() : '';
+                const compRuText = cells[6] ? cells[6].textContent.toLowerCase() : '';
+                const artistText = cells[8] ? cells[8].textContent.toLowerCase() : '';
+
+                // Проверка совпадений
+                const matchSearch = !searchQuery || rowText.includes(searchQuery);
+                const matchGenre = !genreFilter || genreText.includes(genreFilter);
+                const matchCompRu = !composerRuFilter || compRuText.includes(composerRuFilter);
+                const matchCompOrig = !composerOrigFilter || compOrigText.includes(composerOrigFilter);
+                const matchArtist = !artistFilter || artistText.includes(artistFilter);
+
+                if (matchSearch && matchGenre && matchCompRu && matchCompOrig && matchArtist) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('no-results-msg').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // Модальное окно
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('modalImg');
+            const caption = document.getElementById('modal-caption');
+            
+            modal.style.display = 'block';
+            img.src = src;
+            caption.textContent = src.split('/').pop();
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+        });
+    </script>
+</body>
+</html>
