@@ -269,10 +269,8 @@
     </div>
 
     <script>
-        // Базовый путь к папке с полноразмерными картинками
+        // Базовый путь к папке с картинками
         const BASE_PATH = 'cover/';
-        // Путь к папке с миниатюрами
-        const THUMB_PATH = 'cover/thumbs/';
 
         // Словарь для перевода имен композиторов с оригинального на русский
         const composerTranslation = {
@@ -427,27 +425,14 @@
                 // 2. Превью
                 const tdFiles = document.createElement('td');
                 item.files.forEach((fileName, index) => {
-                    // Путь к полноразмерной картинке
                     const fullPath = BASE_PATH + fileName;
-                    // Путь к миниатюре (в папке thumbs)
-                    const thumbPath = THUMB_PATH + fileName;
                     
                     const img = document.createElement('img');
-                    img.src = thumbPath; // Используем миниатюру!
+                    img.src = fullPath;
                     img.className = 'thumbnail';
-                    img.alt = fileName;
-                    img.loading = 'lazy'; // Ленивая загрузка
+                    img.alt = fileName; 
                     
-                    // Если миниатюра не загрузилась, показываем полноразмерную (запасной вариант)
-                    img.onerror = function() {
-                        if (this.src !== fullPath) {
-                            this.src = fullPath;
-                        } else {
-                            this.style.display = 'none'; // Если и полноразмерная не грузится, скрываем
-                        }
-                    };
-                    
-                    // Клик открывает полноразмерную картинку
+                    img.onerror = function() { this.style.display = 'none'; };
                     img.onclick = function() { openModal(fullPath); };
                     
                     tdFiles.appendChild(img);
